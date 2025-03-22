@@ -54,15 +54,16 @@ class ItemController extends Controller
     {
         $item = Item::findOrFail($id);
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|nullable|string',
         ]);
 
-        $item->update($request->only(['title', 'description']));
+        $item->update($validated);
 
         return response()->json($item);
     }
+
 
     /**
      * Remove the specified item from storage.

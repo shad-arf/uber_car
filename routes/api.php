@@ -17,6 +17,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
     Route::post('/items', [ItemController::class, 'store']); // Create an item
-    Route::put('/items/{id}', [ItemController::class, 'update']); // Update an item
+    Route::patch('/items/{id}', [ItemController::class, 'update']); // Patch update an item
     Route::delete('/items/{id}', [ItemController::class, 'destroy']); // Delete an item
 });
