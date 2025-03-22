@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Item;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Symfony\Component\HttpFoundation\Response;
 
 class ItemController extends Controller
 {
@@ -54,6 +54,12 @@ class ItemController extends Controller
     {
         $item = Item::findOrFail($id);
 
+        // Authorization check: ensure the authenticated user owns the item
+        if ($item->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
+        }
+
+        // Validate request data for partial updates
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string',
@@ -63,7 +69,6 @@ class ItemController extends Controller
 
         return response()->json($item);
     }
-
 
     /**
      * Remove the specified item from storage.
