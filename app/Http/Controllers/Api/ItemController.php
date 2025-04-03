@@ -25,6 +25,7 @@ class ItemController extends Controller
                 'id' => $item->id,
                 'title' => $item->title,
                 'description' => $item->description,
+                'phone' => $item->phone,
                 'user_id' => $item->user_id,
                 'user_email' => $item->user->email ?? null,
                 'user_phone' => $item->user->phone ?? null,
@@ -45,6 +46,7 @@ class ItemController extends Controller
         $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
+            'phone'       => 'nullable|string',
             'address'     => 'nullable|string',
             'date'        => 'nullable|date',
         ]);
@@ -53,6 +55,7 @@ class ItemController extends Controller
             'title'       => $request->title,
             'description' => $request->description,
             'address'     => $request->address,
+            'phone'       => $request->phone,
             'date'        => $request->date,
             'is_taken'    => false,       // default
             'user_id'     => Auth::id(),  // current user
@@ -85,6 +88,7 @@ class ItemController extends Controller
         return response()->json([
             'id'          => $item->id,
             'title'       => $item->title,
+            'phone'       => $item->phone,
             'description' => $item->description,
             'user_id'     => $item->user_id,
             'user_email'  => $item->user->email ?? null,
@@ -111,6 +115,7 @@ class ItemController extends Controller
             'title'       => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string',
             'address'     => 'sometimes|nullable|string',
+            'phone'       => 'sometimes|nullable|string',
             'date'        => 'sometimes|nullable|date',
             'is_taken'    => 'sometimes|boolean',
         ]);

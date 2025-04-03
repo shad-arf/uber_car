@@ -16,6 +16,7 @@ class Item extends Model
         'description',
         'address',
         'date',
+        'phone',
         'is_taken',
         'user_id',
     ];
