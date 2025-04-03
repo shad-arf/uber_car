@@ -9,7 +9,7 @@ class Item extends Model
 {
     use HasFactory;
 
-    protected $table = 'item'; // Define table name explicitly
+    protected $table = 'items'; // Define table name explicitly
 
     protected $fillable = [
         'title',
