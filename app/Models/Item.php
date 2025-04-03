@@ -24,7 +24,7 @@ class Item extends Model
     /**
      * Relationship: An item belongs to a user.
      */
-    public function user()
+    public function users()
     {
         return $this->belongsTo(User::class);
     }
