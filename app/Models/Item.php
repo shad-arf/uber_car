@@ -14,6 +14,9 @@ class Item extends Model
     protected $fillable = [
         'title',
         'description',
+        'address',
+        'date',
+        'is_taken',
         'user_id',
     ];
 

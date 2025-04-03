@@ -11,15 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('item', function (Blueprint $table) {
+        Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('description');
+            $table->text('description')->nullable();
+            $table->string('address')->nullable();
+            $table->date('date')->nullable();
+            $table->boolean('is_taken')->default(false); // track if item is taken
             $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
 
+            $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
         });
+
     }
 
     /**

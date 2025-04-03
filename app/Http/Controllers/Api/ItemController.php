@@ -1,83 +1,176 @@
 <?php
 
+
 namespace App\Http\Controllers\Api;
 
 use App\Models\Item;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Controller;
 use Symfony\Component\HttpFoundation\Response;
 
 class ItemController extends Controller
 {
     /**
-     * Display a listing of the items.
+     * List all items
      */
     public function index()
     {
-        $items = Item::all();
-        return response()->json($items);
+        // Load user so we can easily return user_email, user_phone
+        $items = Item::with('user:id,name,email,phone')->get();
+
+        // Transform them into the shape your Flutter code wants
+        $data = $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'description' => $item->description,
+                'user_id' => $item->user_id,
+                'user_email' => $item->user->email ?? null,
+                'user_phone' => $item->user->phone ?? null,
+                'address' => $item->address,
+                'date' => $item->date,
+                'is_taken' => $item->is_taken,
+            ];
+        });
+
+        return response()->json($data, 200);
     }
 
     /**
-     * Store a newly created item in storage.
+     * Create new item
      */
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
+            'address'     => 'nullable|string',
+            'date'        => 'nullable|date',
         ]);
 
         $item = Item::create([
-            'title' => $request->title,
+            'title'       => $request->title,
             'description' => $request->description,
-            'user_id' => Auth::id(),
+            'address'     => $request->address,
+            'date'        => $request->date,
+            'is_taken'    => false,       // default
+            'user_id'     => Auth::id(),  // current user
         ]);
 
-        return response()->json($item, Response::HTTP_CREATED);
+        // Load the user relationship so we can return user_email, user_phone
+        $item->load('user:id,email,phone');
+
+        // Return item in the same shape
+        return response()->json([
+            'id'          => $item->id,
+            'title'       => $item->title,
+            'description' => $item->description,
+            'user_id'     => $item->user_id,
+            'user_email'  => $item->user->email ?? null,
+            'user_phone'  => $item->user->phone ?? null,
+            'address'     => $item->address,
+            'date'        => $item->date,
+            'is_taken'    => $item->is_taken,
+        ], Response::HTTP_CREATED);
     }
 
     /**
-     * Display the specified item.
+     * Show one item
      */
     public function show($id)
     {
-        $item = Item::findOrFail($id);
-        return response()->json($item);
+        $item = Item::with('user:id,email,phone')->findOrFail($id);
+
+        return response()->json([
+            'id'          => $item->id,
+            'title'       => $item->title,
+            'description' => $item->description,
+            'user_id'     => $item->user_id,
+            'user_email'  => $item->user->email ?? null,
+            'user_phone'  => $item->user->phone ?? null,
+            'address'     => $item->address,
+            'date'        => $item->date,
+            'is_taken'    => $item->is_taken,
+        ], 200);
     }
 
     /**
-     * Update the specified item in storage.
+     * Update an item
      */
     public function update(Request $request, $id)
     {
         $item = Item::findOrFail($id);
 
-        // Authorization check: ensure the authenticated user owns the item
+        // Make sure only the owner can update
         if ($item->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
         }
 
-        // Validate request data for partial updates
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
+        $request->validate([
+            'title'       => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string',
+            'address'     => 'sometimes|nullable|string',
+            'date'        => 'sometimes|nullable|date',
+            'is_taken'    => 'sometimes|boolean',
         ]);
 
-        $item->update($validated);
+        $item->update($request->only([
+            'title',
+            'description',
+            'address',
+            'date',
+            'is_taken',
+        ]));
 
-        return response()->json($item);
+        // load user relationship
+        $item->load('user:id,email,phone');
+
+        return response()->json([
+            'id'          => $item->id,
+            'title'       => $item->title,
+            'description' => $item->description,
+            'user_id'     => $item->user_id,
+            'user_email'  => $item->user->email ?? null,
+            'user_phone'  => $item->user->phone ?? null,
+            'address'     => $item->address,
+            'date'        => $item->date,
+            'is_taken'    => $item->is_taken,
+        ], 200);
     }
 
     /**
-     * Remove the specified item from storage.
+     * Mark item as taken
+     * (An alternative to setting is_taken via update)
+     */
+    public function takeItem($id)
+    {
+        $item = Item::findOrFail($id);
+        if ($item->is_taken) {
+            return response()->json(['message' => 'Already taken'], 400);
+        }
+
+        // You could also require authentication if needed
+        $item->is_taken = true;
+        $item->save();
+
+        return response()->json(['message' => 'Item is now taken'], 200);
+    }
+
+    /**
+     * Delete an item
      */
     public function destroy($id)
     {
         $item = Item::findOrFail($id);
+
+        // Only owner can delete
+        if ($item->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
+        }
+
         $item->delete();
 
-        return response()->json(['message' => 'Item deleted successfully.'], Response::HTTP_OK);
+        return response()->json(['message' => 'Item deleted successfully'], Response::HTTP_OK);
     }
 }

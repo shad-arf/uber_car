@@ -19,4 +19,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/items', [ItemController::class, 'store']); // Create an item
     Route::patch('/items/{id}', [ItemController::class, 'update']); // Patch update an item
     Route::delete('/items/{id}', [ItemController::class, 'destroy']); // Delete an item
+    // optional route to mark item as taken
+    Route::post('items/{id}/take', [ItemController::class, 'takeItem']);
 });
