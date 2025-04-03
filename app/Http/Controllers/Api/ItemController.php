@@ -17,7 +17,7 @@ class ItemController extends Controller
     public function index()
     {
         // Load user so we can easily return user_email, user_phone
-        $items = Item::with('user:id,name,email,phone')->get();
+        $items = Item::with('users:id,name,email,phone')->get();
 
         // Transform them into the shape your Flutter code wants
         $data = $items->map(function ($item) {
@@ -59,7 +59,7 @@ class ItemController extends Controller
         ]);
 
         // Load the user relationship so we can return user_email, user_phone
-        $item->load('user:id,email,phone');
+        $item->load('users:id,email,phone');
 
         // Return item in the same shape
         return response()->json([
