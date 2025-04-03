@@ -83,7 +83,7 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        $item = Item::with('user:id,email,phone')->findOrFail($id);
+        $item = Item::with('users:id,email,phone')->findOrFail($id);
 
         return response()->json([
             'id'          => $item->id,
@@ -129,7 +129,7 @@ class ItemController extends Controller
         ]));
 
         // load user relationship
-        $item->load('user:id,email,phone');
+        $item->load('users:id,email,phone');
 
         return response()->json([
             'id'          => $item->id,
