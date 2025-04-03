@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('address')->nullable();
+            $table->string('phone')->nullable();
             $table->date('date')->nullable();
             $table->boolean('is_taken')->default(false); // track if item is taken
             $table->unsignedBigInteger('user_id');
