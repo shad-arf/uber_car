@@ -23,7 +23,7 @@ class AuthController extends Controller
             'birthday' => 'nullable|date',
             'gender' => 'nullable|in:male,female,other',
             'driverlicense' => 'nullable|string',
-            'role' => 'nullable|string|in:admin,user,manager', // Adjust roles as needed
+            'role' => 'nullable|string|in:admin,user,manager,driver', // Adjust roles as needed
             'password' => 'required|string|min:6|confirmed',
         ]);
 
