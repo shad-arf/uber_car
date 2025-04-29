@@ -63,7 +63,7 @@ class ItemController extends Controller
             'destination' => $request->destination,
             'time'        => $request->time,
             'is_taken'    => false,
-            'user_id'     => Auth::id(),
+            'user_id'     => 1,
         ]);
 
         $item->load('user:id,email,phone');
