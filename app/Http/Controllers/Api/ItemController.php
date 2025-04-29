@@ -64,7 +64,7 @@ class ItemController extends Controller
             'destination' => $request->destination,
             'time'        => $request->time,
             'is_taken'    => false,
-            'user_id'     => 1,
+            'user_id'     => Auth::id(),
             'post_type'   => $request->post_type,
         ]);
 
