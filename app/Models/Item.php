@@ -19,6 +19,10 @@ class Item extends Model
         'phone',
         'is_taken',
         'user_id',
+        'destination',
+        'time',
+        'post_type',
+        
     ];
 
     /**

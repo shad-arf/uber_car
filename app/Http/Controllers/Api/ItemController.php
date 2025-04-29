@@ -52,6 +52,7 @@ class ItemController extends Controller
             'destination' => 'nullable|string',
             'time'        => 'nullable|string',
             'date'        => 'nullable|date',
+            
         ]);
 
         $item = Item::create([

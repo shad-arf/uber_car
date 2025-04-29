@@ -18,10 +18,10 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('date')->nullable();
-
             $table->string('destination')->nullable();
             $table->string('time')->nullable();
             $table->boolean('is_taken')->default(false); // track if item is taken
+            $table->string('post_type')->nullable();
             $table->unsignedBigInteger('user_id');
 
             $table->foreign('user_id')->references('id')->on('users');
