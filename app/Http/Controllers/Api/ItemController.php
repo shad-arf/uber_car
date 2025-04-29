@@ -29,6 +29,8 @@ class ItemController extends Controller
                 'user_id' => $item->user_id,
                 'user_email' => $item->user->email ?? null,
                 'user_phone' => $item->user->phone ?? null,
+                'destination' => $item->destination,
+                'time' => $item->time,
                 'address' => $item->address,
                 'date' => $item->date,
                 'is_taken' => $item->is_taken,
@@ -48,6 +50,8 @@ class ItemController extends Controller
             'description' => 'nullable|string',
             'phone'       => 'nullable|string',
             'address'     => 'nullable|string',
+            'destination' => 'nullable|string',
+            'time'        => 'nullable|string',
             'date'        => 'nullable|date',
         ]);
 
@@ -57,9 +61,12 @@ class ItemController extends Controller
             'address'     => $request->address,
             'phone'       => $request->phone,
             'date'        => $request->date,
+            'destination' => $request->destination,
+            'time'        => $request->time,
             'is_taken'    => false,       // default
             'user_id'     => Auth::id(),  // current user
         ]);
+
 
         // Load the user relationship so we can return user_email, user_phone
         $item->load('users:id,email,phone');
@@ -72,6 +79,9 @@ class ItemController extends Controller
             'user_id'     => $item->user_id,
             'user_email'  => $item->user->email ?? null,
             'user_phone'  => $item->user->phone ?? null,
+            'phone'       => $item->phone,
+            'destination' => $item->destination,
+            'time'        => $item->time,
             'address'     => $item->address,
             'date'        => $item->date,
             'is_taken'    => $item->is_taken,
@@ -93,6 +103,8 @@ class ItemController extends Controller
             'user_id'     => $item->user_id,
             'user_email'  => $item->user->email ?? null,
             'user_phone'  => $item->user->phone ?? null,
+            'destination' => $item->destination,
+            'time'        => $item->time,
             'address'     => $item->address,
             'date'        => $item->date,
             'is_taken'    => $item->is_taken,
@@ -116,6 +128,8 @@ class ItemController extends Controller
             'description' => 'sometimes|nullable|string',
             'address'     => 'sometimes|nullable|string',
             'phone'       => 'sometimes|nullable|string',
+            'destination' => 'sometimes|nullable|string',
+            'time'        => 'sometimes|nullable|string',
             'date'        => 'sometimes|nullable|date',
             'is_taken'    => 'sometimes|boolean',
         ]);
@@ -124,6 +138,9 @@ class ItemController extends Controller
             'title',
             'description',
             'address',
+            'phone',
+            'destination',
+            'time',
             'date',
             'is_taken',
         ]));
@@ -138,6 +155,9 @@ class ItemController extends Controller
             'user_id'     => $item->user_id,
             'user_email'  => $item->user->email ?? null,
             'user_phone'  => $item->user->phone ?? null,
+            'phone'       => $item->phone,
+            'destination' => $item->destination,
+            'time'        => $item->time,
             'address'     => $item->address,
             'date'        => $item->date,
             'is_taken'    => $item->is_taken,
