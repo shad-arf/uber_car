@@ -55,6 +55,8 @@ class ItemController extends Controller
             'post_type'   => 'nullable|string',
         ]);
 
+        $user = $request->user(); // or Auth::user()
+        dd($user);
         $item = Item::create([
             'title'       => $request->title,
             'description' => $request->description,
@@ -64,7 +66,7 @@ class ItemController extends Controller
             'destination' => $request->destination,
             'time'        => $request->time,
             'is_taken'    => false,
-            'user_id'     => Auth::id(),
+            'user_id'     => $user->id,
             'post_type'   => $request->post_type,
         ]);
 
