@@ -52,7 +52,7 @@ class ItemController extends Controller
             'destination' => 'nullable|string',
             'time'        => 'nullable|string',
             'date'        => 'nullable|date',
-            
+            'post_type'   => 'nullable|string',
         ]);
 
         $item = Item::create([
@@ -65,6 +65,7 @@ class ItemController extends Controller
             'time'        => $request->time,
             'is_taken'    => false,
             'user_id'     => 1,
+            'post_type'   => $request->post_type,
         ]);
 
         $item->load('users:id,email,phone');
@@ -81,6 +82,7 @@ class ItemController extends Controller
             'time'        => $item->time,
             'address'     => $item->address,
             'date'        => $item->date,
+            'post_type'   => $item->post_type,
             'is_taken'    => $item->is_taken,
         ], Response::HTTP_CREATED);
     }
@@ -103,6 +105,7 @@ class ItemController extends Controller
             'destination' => $item->destination,
             'time'        => $item->time,
             'address'     => $item->address,
+            'post_type'   => $item->post_type,
             'date'        => $item->date,
             'is_taken'    => $item->is_taken,
         ], Response::HTTP_OK);
@@ -126,12 +129,13 @@ class ItemController extends Controller
             'phone'       => 'sometimes|nullable|string',
             'destination' => 'sometimes|nullable|string',
             'time'        => 'sometimes|nullable|string',
+            'post_type'   => 'sometimes|nullable|string',
             'date'        => 'sometimes|nullable|date',
             'is_taken'    => 'sometimes|boolean',
         ]);
 
         $item->update($request->only([
-            'title', 'description', 'address', 'phone', 'destination', 'time', 'date', 'is_taken'
+            'title', 'description', 'address', 'phone', 'destination', 'time', 'date', 'is_taken', 'post_type'
         ]));
 
         $item->load('users:id,email,phone');
@@ -145,6 +149,7 @@ class ItemController extends Controller
             'user_phone'  => optional($item->user)->phone,
             'phone'       => $item->phone,
             'destination' => $item->destination,
+            'post_type'   => $item->post_type,
             'time'        => $item->time,
             'address'     => $item->address,
             'date'        => $item->date,
