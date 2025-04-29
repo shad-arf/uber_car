@@ -17,7 +17,7 @@ class ItemController extends Controller
     public function index()
     {
         // Eager-load the user relationship
-        $items = Item::with('user:id,name,email,phone')->get();
+        $items = Item::with('users:id,name,email,phone')->get();
 
         $data = $items->map(function ($item) {
             return [
