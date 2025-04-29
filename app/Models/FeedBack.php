@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class FeedBack extends Model
 {
     use HasFactory;
+      // Mass-assignable fields
+      protected $table = 'feed_backs';
+      protected $fillable = [
+        'name',
+        'message',
+    ];
+
 }

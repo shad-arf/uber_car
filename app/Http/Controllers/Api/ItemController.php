@@ -64,7 +64,7 @@ class ItemController extends Controller
             'destination' => $request->destination,
             'time'        => $request->time,
             'is_taken'    => false,       // default
-            'user_id'     => Auth::id(),  // current user
+            'user_id'     => 1,  // current user
         ]);
 
 
