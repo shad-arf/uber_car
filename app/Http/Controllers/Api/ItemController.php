@@ -66,7 +66,7 @@ class ItemController extends Controller
             'user_id'     => 1,
         ]);
 
-        $item->load('user:id,email,phone');
+        $item->load('users:id,email,phone');
 
         return response()->json([
             'id'          => $item->id,
@@ -89,7 +89,7 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        $item = Item::with('user:id,email,phone')->findOrFail($id);
+        $item = Item::with('users:id,email,phone')->findOrFail($id);
 
         return response()->json([
             'id'          => $item->id,
@@ -133,7 +133,7 @@ class ItemController extends Controller
             'title', 'description', 'address', 'phone', 'destination', 'time', 'date', 'is_taken'
         ]));
 
-        $item->load('user:id,email,phone');
+        $item->load('users:id,email,phone');
 
         return response()->json([
             'id'          => $item->id,
