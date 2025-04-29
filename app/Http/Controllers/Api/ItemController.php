@@ -105,7 +105,8 @@ class ItemController extends Controller
             'destination' => $item->destination,
             'time'        => $item->time,
             'address'     => $item->address,
-            'post_type'   => $item->post_type,
+            // defalute post type to 'lost'
+            'post_type'   => $item->post_type ?? 'user',
             'date'        => $item->date,
             'is_taken'    => $item->is_taken,
         ], Response::HTTP_OK);
