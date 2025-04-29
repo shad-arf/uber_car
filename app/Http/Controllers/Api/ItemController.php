@@ -16,28 +16,27 @@ class ItemController extends Controller
      */
     public function index()
     {
-        // Load user so we can easily return user_email, user_phone
-        $items = Item::with('users:id,name,email,phone')->get();
+        // Eager-load the user relationship
+        $items = Item::with('user:id,name,email,phone')->get();
 
-        // Transform them into the shape your Flutter code wants
         $data = $items->map(function ($item) {
             return [
-                'id' => $item->id,
-                'title' => $item->title,
+                'id'          => $item->id,
+                'title'       => $item->title,
                 'description' => $item->description,
-                'phone' => $item->phone,
-                'user_id' => $item->user_id,
-                'user_email' => $item->user->email ?? null,
-                'user_phone' => $item->user->phone ?? null,
+                'phone'       => $item->phone,
+                'user_id'     => $item->user_id,
+                'user_email'  => optional($item->user)->email,
+                'user_phone'  => optional($item->user)->phone,
                 'destination' => $item->destination,
-                'time' => $item->time,
-                'address' => $item->address,
-                'date' => $item->date,
-                'is_taken' => $item->is_taken,
+                'time'        => $item->time,
+                'address'     => $item->address,
+                'date'        => $item->date,
+                'is_taken'    => $item->is_taken,
             ];
         });
 
-        return response()->json($data, 200);
+        return response()->json($data, Response::HTTP_OK);
     }
 
     /**
@@ -63,22 +62,19 @@ class ItemController extends Controller
             'date'        => $request->date,
             'destination' => $request->destination,
             'time'        => $request->time,
-            'is_taken'    => false,       // default
-            'user_id'     => 1,  // current user
+            'is_taken'    => false,
+            'user_id'     => Auth::id(),
         ]);
 
+        $item->load('user:id,email,phone');
 
-        // Load the user relationship so we can return user_email, user_phone
-        $item->load('users:id,email,phone');
-
-        // Return item in the same shape
         return response()->json([
             'id'          => $item->id,
             'title'       => $item->title,
             'description' => $item->description,
             'user_id'     => $item->user_id,
-            'user_email'  => $item->user->email ?? null,
-            'user_phone'  => $item->user->phone ?? null,
+            'user_email'  => optional($item->user)->email,
+            'user_phone'  => optional($item->user)->phone,
             'phone'       => $item->phone,
             'destination' => $item->destination,
             'time'        => $item->time,
@@ -93,7 +89,7 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        $item = Item::with('users:id,email,phone')->findOrFail($id);
+        $item = Item::with('user:id,email,phone')->findOrFail($id);
 
         return response()->json([
             'id'          => $item->id,
@@ -101,14 +97,14 @@ class ItemController extends Controller
             'phone'       => $item->phone,
             'description' => $item->description,
             'user_id'     => $item->user_id,
-            'user_email'  => $item->user->email ?? null,
-            'user_phone'  => $item->user->phone ?? null,
+            'user_email'  => optional($item->user)->email,
+            'user_phone'  => optional($item->user)->phone,
             'destination' => $item->destination,
             'time'        => $item->time,
             'address'     => $item->address,
             'date'        => $item->date,
             'is_taken'    => $item->is_taken,
-        ], 200);
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -118,7 +114,6 @@ class ItemController extends Controller
     {
         $item = Item::findOrFail($id);
 
-        // Make sure only the owner can update
         if ($item->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
         }
@@ -135,51 +130,40 @@ class ItemController extends Controller
         ]);
 
         $item->update($request->only([
-            'title',
-            'description',
-            'address',
-            'phone',
-            'destination',
-            'time',
-            'date',
-            'is_taken',
+            'title', 'description', 'address', 'phone', 'destination', 'time', 'date', 'is_taken'
         ]));
 
-        // load user relationship
-        $item->load('users:id,email,phone');
+        $item->load('user:id,email,phone');
 
         return response()->json([
             'id'          => $item->id,
             'title'       => $item->title,
             'description' => $item->description,
             'user_id'     => $item->user_id,
-            'user_email'  => $item->user->email ?? null,
-            'user_phone'  => $item->user->phone ?? null,
+            'user_email'  => optional($item->user)->email,
+            'user_phone'  => optional($item->user)->phone,
             'phone'       => $item->phone,
             'destination' => $item->destination,
             'time'        => $item->time,
             'address'     => $item->address,
             'date'        => $item->date,
             'is_taken'    => $item->is_taken,
-        ], 200);
+        ], Response::HTTP_OK);
     }
 
     /**
      * Mark item as taken
-     * (An alternative to setting is_taken via update)
      */
     public function takeItem($id)
     {
         $item = Item::findOrFail($id);
         if ($item->is_taken) {
-            return response()->json(['message' => 'Already taken'], 400);
+            return response()->json(['message' => 'Already taken'], Response::HTTP_BAD_REQUEST);
         }
 
-        // You could also require authentication if needed
-        $item->is_taken = true;
-        $item->save();
+        $item->update(['is_taken' => true]);
 
-        return response()->json(['message' => 'Item is now taken'], 200);
+        return response()->json(['message' => 'Item is now taken'], Response::HTTP_OK);
     }
 
     /**
@@ -189,7 +173,6 @@ class ItemController extends Controller
     {
         $item = Item::findOrFail($id);
 
-        // Only owner can delete
         if ($item->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
         }
@@ -198,4 +181,5 @@ class ItemController extends Controller
 
         return response()->json(['message' => 'Item deleted successfully'], Response::HTTP_OK);
     }
+
 }
