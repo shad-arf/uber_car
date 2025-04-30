@@ -190,11 +190,12 @@ class ItemController extends Controller
     public function takeItem($id)
     {
         $item = Item::findOrFail($id);
-        if ($item->is_taken) {
+        $user = Auth::user();
+        if ($item->taken) {
             return response()->json(['message' => 'Already taken'], Response::HTTP_BAD_REQUEST);
         }
 
-        $item->update(['is_taken' => true]);
+        $item->update(['taken' => $user->id]);
 
         return response()->json(['message' => 'Item is now taken'], Response::HTTP_OK);
     }
