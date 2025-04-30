@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('date')->nullable();
             $table->string('destination')->nullable();
             $table->string('time')->nullable();
-            $table->boolean('is_taken')->default(false); // track if item is taken
+            $table->unsignedBigInteger('taken')->nullable(); // track if item is taken
             $table->string('post_type')->nullable();
             $table->unsignedBigInteger('user_id');
 

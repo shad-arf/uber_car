@@ -17,6 +17,8 @@ Route::apiResource('feedbacks', controller: FeedbackController::class);
 Route::middleware('auth:api')->group(function () {
 
     Route::get('/items/{id}', [ItemController::class, 'show']); // Get a specific item
+    Route::get('/useritems', [ItemController::class, 'useritems']); // Get a specific item
+
     Route::post('/items', [ItemController::class, 'store']); // Create an item
     Route::get('/users', action: [AuthController::class, 'userProfile']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
