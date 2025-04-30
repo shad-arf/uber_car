@@ -55,7 +55,7 @@ class ItemController extends Controller
             'post_type'   => 'nullable|string',
         ]);
 
-        $user = $request->users(); // or Auth::user()
+        $user = $request->user(); // or Auth::user()
         dd($user);
         $item = Item::create([
             'title'       => $request->title,
@@ -67,7 +67,7 @@ class ItemController extends Controller
             'time'        => $request->time,
             'is_taken'    => false,
             'user_id'     => $user->id,
-            'post_type'   => $request->post_type,
+            'post_type'   => $request->post_type ?? 'user', // Default to 'lost' if not provided
         ]);
 
         $item->load('users:id,email,phone');
@@ -108,7 +108,7 @@ class ItemController extends Controller
             'time'        => $item->time,
             'address'     => $item->address,
             // defalute post type to 'lost'
-            'post_type'   => $item->post_type ?? 'user',
+            'post_type'   => $item->post_type ,
             'date'        => $item->date,
             'is_taken'    => $item->is_taken,
         ], Response::HTTP_OK);
