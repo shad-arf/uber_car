@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ItemController;
-use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\FeedBackController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -12,7 +12,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login'); // ✅ E
 Route::get('/items', [ItemController::class, 'index']); // Get all items
 
 
-Route::apiResource('feedbacks', FeedbackController::class);
+Route::apiResource('feedbacks', controller: FeedbackController::class);
 // Protected Routes (Require JWT Authentication)
 Route::middleware('auth:api')->group(function () {
     Route::get('/items/{id}', [ItemController::class, 'show']); // Get a specific item
