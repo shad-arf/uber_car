@@ -13,6 +13,7 @@ class FeedBack extends Model
       protected $fillable = [
         'name',
         'message',
+        'rating',
     ];
 
 }

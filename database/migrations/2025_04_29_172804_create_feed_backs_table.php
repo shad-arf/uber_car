@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->text('message');
+            $table->text('rating')->nullable(); // Assuming you want to add a rating level
             $table->timestamps();
         });
     }
