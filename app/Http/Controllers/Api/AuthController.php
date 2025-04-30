@@ -9,11 +9,40 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+
 class AuthController extends Controller
 {
     /**
      * Register a new user
      */
+
+     public function changePassword(Request $request)
+    {
+        // 1. Validate input
+        $request->validate([
+            'current_password'      => 'required|string',
+            'new_password'          => 'required|string|min:6|confirmed',
+            // 'new_password_confirmation' must match new_password
+        ]);
+
+        // 2. Get the authenticated user (via JWT token)
+        $user = JWTAuth::parseToken()->authenticate();
+
+        // 3. Check current password
+        if (! Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'error' => 'Your current password does not match our records.'
+            ], 400);
+        }
+
+        // 4. Update to new password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password changed successfully'
+        ], 200);
+    }
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
