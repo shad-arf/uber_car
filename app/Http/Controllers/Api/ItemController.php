@@ -56,6 +56,7 @@ class ItemController extends Controller
         ]);
 
         $user = $request->user(); // or Auth::user()
+        dd($request->all());
         $item = Item::create([
             'title'       => $request->title,
             'description' => $request->description,
