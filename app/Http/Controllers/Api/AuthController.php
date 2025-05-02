@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Item;
+use App\Models\FeedBack;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -208,5 +210,13 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json(['message' => 'User demoted to user successfully']);
+    }
+    // dashboard infrormation
+    public function dashboard(){
+        return response()->json([
+            'users'      => User::count(),
+            'properties' => Item::count(),
+            'feedbacks'  => FeedBack::count(),
+        ]);
     }
 }

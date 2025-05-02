@@ -18,6 +18,8 @@ Route::apiResource('feedbacks', controller: FeedbackController::class);
 Route::middleware('auth:api')->group(function () {
     // promote user to admin
     Route::post('/users/{id}/promote', [AuthController::class, 'promoteToAdmin']);
+    Route::get('/dashboard', [AuthController::class, 'dashboard']);
+    //
     // demote user to user
     Route::post('/users/{id}/demote', [AuthController::class, 'demoteToUser']);
     // promote user to manager
