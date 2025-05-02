@@ -145,9 +145,11 @@ class ItemController extends Controller
     {
         $item = Item::findOrFail($id);
 
-        if ($item->user_id !== Auth::id()) {
+        //  check if the authenticated user is admin or the owner of the item
+        if (Auth::user()->role !== 'admin' && $item->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
         }
+
 
         $request->validate([
             'title'       => 'sometimes|required|string|max:255',
