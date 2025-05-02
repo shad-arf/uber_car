@@ -106,13 +106,6 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
-    /**
-     * Get the authenticated user
-     */
-    public function userProfile()
-    {
-        return response()->json(data: auth()->user());
-    }
 
     /**
      * Refresh JWT Token
@@ -123,5 +116,41 @@ class AuthController extends Controller
             'user' => auth()->user(),
             'token' => auth()->refresh()
         ]);
+    }
+
+    public function userProfile()
+    {
+        return response()->json(data: auth()->user());
+    }
+
+    // Get user by ID (admin only)
+    public function getUserById($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        return response()->json($user);
+    }
+    // Get all users (admin only)
+    public function getAllUsers()
+    {
+        $users = User::all();
+        return response()->json($users);
+    }
+    // admin can delete any user
+    public function deleteUser($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully']);
     }
 }

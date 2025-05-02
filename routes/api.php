@@ -11,7 +11,6 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login'); // ✅ Ensure this exists
 Route::get('/items', [ItemController::class, 'index']); // Get all items
 
-
 Route::apiResource('feedbacks', controller: FeedbackController::class);
 // Protected Routes (Require JWT Authentication)
 Route::middleware('auth:api')->group(function () {
@@ -21,6 +20,9 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('/items', [ItemController::class, 'store']); // Create an item
     Route::get('/users', action: [AuthController::class, 'userProfile']);
+    Route::get('/users/{id}', action: [AuthController::class, 'getUserById']);
+    Route::get('/user', action: [AuthController::class, 'getAllUsers']);
+    Route::patch('/users/{id}', action: [AuthController::class, 'deleteUser']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
     Route::post('/changePassword', [AuthController::class, 'changePassword'])->name('changePassword');
