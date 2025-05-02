@@ -22,7 +22,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/users', action: [AuthController::class, 'userProfile']);
     Route::get('/users/{id}', action: [AuthController::class, 'getUserById']);
     Route::get('/user', action: [AuthController::class, 'getAllUsers']);
-    Route::patch('/users/{id}', action: [AuthController::class, 'deleteUser']);
+    Route::delete('/users/{id}', action: [AuthController::class, 'deleteUser']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
     Route::post('/changePassword', [AuthController::class, 'changePassword'])->name('changePassword');
