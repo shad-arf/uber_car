@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\FeedBackController;
+use App\Http\Controllers\Api\ItemController;
 
 use Illuminate\Support\Facades\Route;
 
