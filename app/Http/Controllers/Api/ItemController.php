@@ -216,4 +216,53 @@ class ItemController extends Controller
         return response()->json(['message' => 'Item deleted successfully'], Response::HTTP_OK);
     }
 
+    // Get all items that post_type is manager
+    public function manager()
+    {
+        $items = Item::where('post_type', 'manager')->with('users:id,email,phone')->get();
+
+        $data = $items->map(function ($item) {
+            return [
+                'id'          => $item->id,
+                'title'       => $item->title,
+                'description' => $item->description,
+                'phone'       => $item->phone,
+                'user_id'     => $item->user_id,
+                'user_email'  => optional($item->user)->email,
+                'user_phone'  => optional($item->user)->phone,
+                'destination' => $item->destination,
+                'time'        => $item->time,
+                'address'     => $item->address,
+                'date'        => $item->date,
+                'is_taken'    => $item->is_taken,
+            ];
+        });
+
+        return response()->json($data, Response::HTTP_OK);
+    }
+    // Get all items that post_type is user
+    public function user()
+    {
+        $items = Item::where('post_type', 'user')->with('users:id,email,phone')->get();
+
+        $data = $items->map(function ($item) {
+            return [
+                'id'          => $item->id,
+                'title'       => $item->title,
+                'description' => $item->description,
+                'phone'       => $item->phone,
+                'user_id'     => $item->user_id,
+                'user_email'  => optional($item->user)->email,
+                'user_phone'  => optional($item->user)->phone,
+                'destination' => $item->destination,
+                'time'        => $item->time,
+                'address'     => $item->address,
+                'date'        => $item->date,
+                'is_taken'    => $item->is_taken,
+            ];
+        });
+
+        return response()->json($data, Response::HTTP_OK);
+    }
+
 }

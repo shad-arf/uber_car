@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login'); // ✅ Ensure this exists
 Route::get('/items', [ItemController::class, 'index']); // Get all items
+Route::get('/items/user', [ItemController::class, 'user']); // Get all items
+Route::get('/items/manager', [ItemController::class, 'manager']); // Get all items
 
 Route::apiResource('feedbacks', controller: FeedbackController::class);
 // Protected Routes (Require JWT Authentication)
