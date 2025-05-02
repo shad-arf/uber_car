@@ -14,6 +14,10 @@ Route::get('/items', [ItemController::class, 'index']); // Get all items
 Route::apiResource('feedbacks', controller: FeedbackController::class);
 // Protected Routes (Require JWT Authentication)
 Route::middleware('auth:api')->group(function () {
+    // promote user to admin
+    Route::post('/users/{id}/promote', [AuthController::class, 'promoteToAdmin']);
+    // demote user to user
+    Route::post('/users/{id}/demote', [AuthController::class, 'demoteToUser']);
 
     Route::get('/items/{id}', [ItemController::class, 'show']); // Get a specific item
     Route::get('/useritems', [ItemController::class, 'useritems']); // Get a specific item
