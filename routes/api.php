@@ -18,6 +18,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/users/{id}/promote', [AuthController::class, 'promoteToAdmin']);
     // demote user to user
     Route::post('/users/{id}/demote', [AuthController::class, 'demoteToUser']);
+    // promote user to manager
+    Route::post('/users/{id}/promote/manager', [AuthController::class, 'promoteToManager']);
+    // demote manager to user
+    Route::post('/users/{id}/demote/manager', [AuthController::class, 'demoteManagerToUser']);
 
     Route::get('/items/{id}', [ItemController::class, 'show']); // Get a specific item
     Route::get('/useritems', [ItemController::class, 'useritems']); // Get a specific item

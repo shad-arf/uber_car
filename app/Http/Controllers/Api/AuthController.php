@@ -181,4 +181,32 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'User demoted to user successfully']);
     }
+    // promote user to manager
+    public function promoteToManager($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $user->role = 'manager';
+        $user->save();
+
+        return response()->json(['message' => 'User promoted to manager successfully']);
+    }
+    // demote manager to user
+    public function demoteManagerToUser($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $user->role = 'user';
+        $user->save();
+
+        return response()->json(['message' => 'User demoted to user successfully']);
+    }
 }
