@@ -42,4 +42,6 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/items/{id}', [ItemController::class, 'destroy']); // Delete an item
     // optional route to mark item as taken
     Route::post('items/{id}/take', [ItemController::class, 'takeItem']);
+    Route::get('myitem', [ItemController::class, 'myitem']);
+
 });

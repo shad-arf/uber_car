@@ -201,6 +201,31 @@ class ItemController extends Controller
 
         return response()->json(['message' => 'Item is now taken'], Response::HTTP_OK);
     }
+    // user should be able to know if what item they took
+    public function myItems()
+    {
+        $user = Auth::user();
+        $items = Item::where('taken', $user->id)->with('users:id,email,phone')->get();
+
+        $data = $items->map(function ($item) {
+            return [
+                'id'          => $item->id,
+                'title'       => $item->title,
+                'description' => $item->description,
+                'phone'       => $item->phone,
+                'user_id'     => $item->user_id,
+                'user_email'  => optional($item->user)->email,
+                'user_phone'  => optional($item->user)->phone,
+                'destination' => $item->destination,
+                'time'        => $item->time,
+                'address'     => $item->address,
+                'date'        => $item->date,
+                'is_taken'    => $item->is_taken,
+            ];
+        });
+
+        return response()->json($data, Response::HTTP_OK);
+    }
 
     /**
      * Delete an item
