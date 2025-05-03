@@ -205,7 +205,7 @@ class ItemController extends Controller
     public function myItem()
     {
         $user = Auth::user();
-        $items = Item::where('taken', $user->id)->with('users:id,email,phone')->get();
+        $items = Item::where('is_taken', $user->id)->with('users:id,email,phone')->get();
 
         $data = $items->map(function ($item) {
             return [
