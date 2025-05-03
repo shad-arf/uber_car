@@ -202,7 +202,7 @@ class ItemController extends Controller
         return response()->json(['message' => 'Item is now taken'], Response::HTTP_OK);
     }
     // user should be able to know if what item they took
-    public function myItems()
+    public function myItem()
     {
         $user = Auth::user();
         $items = Item::where('taken', $user->id)->with('users:id,email,phone')->get();
