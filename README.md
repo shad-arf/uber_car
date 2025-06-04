@@ -1,41 +1,35 @@
 
-# Uber Car
+# Items & Feedback API
 
-A **Laravel**-powered backend for a simple ride-hailing (Uber-style) application. This project implements user authentication, passenger and driver roles, ride requests, and basic ride-management workflows. It follows the code demonstrated in the Laracasts “Uber Car” course.
+A **Laravel**-powered RESTful API that supports user registration and JWT-based authentication, role management, item listings (e.g., lost/found posts), and a feedback system. This project uses the [tymon/jwt-auth](https://github.com/tymondesigns/jwt-auth) package for token-based auth and exposes all endpoints under the `/api/` prefix.
 
 ---
 
 ## Features
 
-- **User Authentication**  
-  - Register and login for both passengers and drivers  
-  - Token-based authentication using Laravel Sanctum (or Passport)
+- **User Registration & Authentication**  
+  - Register new users with name, email, phone, and optional profile fields (birthday, gender, driver’s license, role).  
+  - Login to receive a JWT token.  
+  - Protected endpoints via `auth:api` middleware (JWT).  
+  - Logout, token refresh, and password change.
 
-- **User Roles & Permissions**  
-  - **Passenger**: can request a ride, view ride status, and see ride history  
-  - **Driver**: can view available ride requests, accept or decline a ride, and update ride status  
-  - **Admin (optional)**: can manage users and view all rides
+- **Role Management**  
+  - Users can have roles: `user`, `admin`, `manager`, or `driver`.  
+  - Admins can promote or demote other users to/from `admin` or `manager` roles.
 
-- **Ride Requests**  
-  - Passengers can request a new ride by specifying pickup and drop-off locations  
-  - Drivers see a queue of open ride requests and can choose to accept one  
-  - Once accepted, the ride’s status updates and is no longer available to other drivers
+- **Item Management**  
+  - Public endpoints to list all items or filter by “user” vs. “manager” posts.  
+  - Authenticated users can create, view, update, and delete their own items.  
+  - Optional “take” action: mark an item as taken by a user.  
+  - Special endpoints to list items taken by the authenticated user.
 
-- **Ride Management**  
-  - Drivers can update ride status (e.g., “en route,” “arrived,” “in progress,” “completed,” “canceled”)  
-  - Passengers can see real-time status updates for their current ride  
-  - Fare is calculated automatically based on distance and/or time
+- **Feedback System**  
+  - Full CRUD API for feedback entries with name, message, and rating.  
+  - Public `GET /api/feedbacks` to see all feedbacks (newest first).  
+  - Authenticated users can create, update, or delete feedback entries.
 
-- **Notifications (optional)**  
-  - Email (or SMS) notifications to driver when a new ride is requested  
-  - Email (or SMS) notifications to passenger when a driver accepts their ride or updates status
-
-- **API Versioning**  
-  - All endpoints are prefixed with `/api/v1` (future v2 additions can include payment integration, driver ratings, etc.)
-
-- **Validation & Error Handling**  
-  - Request validation via Form Requests  
-  - Consistent JSON-formatted error responses
+- **Dashboard Summary**  
+  - Authenticated endpoint to view overall counts: total users, total items, and total feedback entries.
 
 ---
 
@@ -43,11 +37,9 @@ A **Laravel**-powered backend for a simple ride-hailing (Uber-style) application
 
 - **Laravel 10** (PHP framework)  
 - **PHP 8.1+**  
-- **MySQL** (or MariaDB)  
-- **Laravel Sanctum** (or Passport) for API tokens  
+- **MySQL** (or another supported relational database)  
+- **tymon/jwt-auth** for JWT-based authentication  
 - **Composer** for dependency management  
-- **Redis** (optional—for queues or caching)  
-- **Postman / Insomnia** (recommended for testing endpoints)
 
 ---
 
@@ -57,29 +49,42 @@ A **Laravel**-powered backend for a simple ride-hailing (Uber-style) application
 
 - PHP ≥ 8.1  
 - Composer  
-- MySQL (or any other supported relational database)  
-- (Optional) Redis if you plan to queue notifications  
-- (Optional) Laravel Sanctum (or Passport) for API authentication  
+- MySQL (or MariaDB)  
+- A fresh Laravel installation (or clone this repo)  
+- Install and configure the `tymon/jwt-auth` package
 
 ### Installation
 
-1. **Clone the repository**
+1. **Clone the repository**  
    ```bash
-   git clone https://github.com/shad-arf/uber_car.git
-   cd uber_car
+   git clone https://github.com/shad-arf/your-repo-name.git
+   cd your-repo-name
 
-2. **Install PHP dependencies**
+2. **Install Composer dependencies**
 
    ```bash
    composer install
    ```
 
-3. **Environment setup**
+3. **Publish and configure JWT Auth**
 
-   * Copy the example environment file and generate an app key:
+   ```bash
+   php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
+   php artisan jwt:secret
+   ```
+
+   This will add `JWT_SECRET` to your `.env` file.
+
+4. **Setup environment**
+
+   * Copy `.env.example` to `.env`:
 
      ```bash
      cp .env.example .env
+     ```
+   * Generate an application key:
+
+     ```bash
      php artisan key:generate
      ```
    * Open `.env` and configure your database credentials:
@@ -88,324 +93,693 @@ A **Laravel**-powered backend for a simple ride-hailing (Uber-style) application
      DB_CONNECTION=mysql
      DB_HOST=127.0.0.1
      DB_PORT=3306
-     DB_DATABASE=uber_car
-     DB_USERNAME=your_db_user
-     DB_PASSWORD=your_db_password
+     DB_DATABASE=your_database
+     DB_USERNAME=your_username
+     DB_PASSWORD=your_password
+
+     # JWT Secret generated by jwt:secret
+     JWT_SECRET=your_generated_jwt_secret
      ```
 
-4. **Run Migrations & Seeders**
+5. **Run Migrations**
 
    ```bash
-   php artisan migrate --seed
+   php artisan migrate
    ```
 
-   The seeder will create a few users with roles (passenger, driver, admin) and sample rides for testing.
+   Three tables will be created: `users`, `items`, and `feed_backs`.
 
-5. **Install & Configure Sanctum (or Passport)**
-
-   * If using **Laravel Sanctum**, publish its config:
-
-     ```bash
-     php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
-     php artisan migrate
-     ```
-   * If using **Laravel Passport**, run:
-
-     ```bash
-     php artisan passport:install
-     ```
-
-     Make sure your `AuthServiceProvider` calls `Passport::routes()`.
-
-6. **Start the development server**
+6. **Serve the Application**
 
    ```bash
    php artisan serve
    ```
 
-   The API will be available at `http://127.0.0.1:8000`.
+   The API is now available at `http://127.0.0.1:8000/api/`.
 
 ---
 
-## API Endpoints
+## Database Schema Overview
 
-All API routes live under `/api/v1`. Use a Bearer token (Sanctum/Passport) for protected routes.
+1. **users**
 
-### Authentication
+   | Column              | Type          | Details                                         |
+   | ------------------- | ------------- | ----------------------------------------------- |
+   | `id`                | `bigint`      | Primary key                                     |
+   | `name`              | `string(255)` | User’s full name                                |
+   | `email`             | `string(255)` | Unique, used for login                          |
+   | `phone`             | `string(15)`  | Unique phone number                             |
+   | `birthday`          | `string`      | Nullable (YYYY-MM-DD)                           |
+   | `gender`            | `string`      | Nullable (`male`, `female`, `other`)            |
+   | `driverlicense`     | `string`      | Nullable                                        |
+   | `role`              | `string`      | Nullable (`admin`, `manager`, `driver`, `user`) |
+   | `email_verified_at` | `timestamp`   | Nullable                                        |
+   | `password`          | `string(255)` | Hashed password                                 |
+   | `remember_token`    | `string(100)` | Nullable                                        |
+   | `created_at`        | `timestamp`   |                                                 |
+   | `updated_at`        | `timestamp`   |                                                 |
 
-* **Register**
-  `POST /api/v1/auth/register`
-  **Request Body**:
+2. **items**
+
+   | Column        | Type             | Details                                                   |
+   | ------------- | ---------------- | --------------------------------------------------------- |
+   | `id`          | `bigint`         | Primary key                                               |
+   | `title`       | `string(255)`    | Title of the item post                                    |
+   | `description` | `text`           | Nullable description                                      |
+   | `address`     | `string`         | Nullable address                                          |
+   | `phone`       | `string`         | Nullable contact number                                   |
+   | `date`        | `string`         | Nullable date string                                      |
+   | `destination` | `string`         | Nullable destination                                      |
+   | `time`        | `string`         | Nullable time string                                      |
+   | `taken`       | `unsignedBigInt` | Nullable, stores `user_id` of who took the item           |
+   | `post_type`   | `string`         | Nullable, e.g. `user` or `manager`                        |
+   | `user_id`     | `unsignedBigInt` | Foreign key → `users.id`, indicates who created this item |
+   | `created_at`  | `timestamp`      |                                                           |
+   | `updated_at`  | `timestamp`      |                                                           |
+
+3. **feed\_backs**
+
+   | Column       | Type          | Details                             |
+   | ------------ | ------------- | ----------------------------------- |
+   | `id`         | `bigint`      | Primary key                         |
+   | `name`       | `string(255)` | Nullable name of feedback author    |
+   | `message`    | `text`        | Feedback message (required)         |
+   | `rating`     | `text`        | Nullable rating level (e.g., `1-5`) |
+   | `created_at` | `timestamp`   |                                     |
+   | `updated_at` | `timestamp`   |                                     |
+
+---
+
+## API Routes
+
+All routes are prefixed with `/api/`. Unless otherwise noted, endpoints that modify data are protected by the `auth:api` middleware (JWT token required). Use `Bearer <token>` in the `Authorization` header for authenticated routes.
+
+### 1. Authentication & User Management
+
+* **Register a new user**
+  `POST /api/register`
+  **Request Body (JSON)**
 
   ```json
   {
-    "name": "Jane Doe",
-    "email": "jane@example.com",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "1234567890",
+    "birthday": "1990-05-20",        // optional
+    "gender": "male",                // optional: male|female|other
+    "driverlicense": "D1234567",     // optional
+    "role": "user",                  // optional: ─ defaults to "user" if omitted
     "password": "secret123",
-    "password_confirmation": "secret123",
-    "role": "passenger"      // or "driver"
+    "password_confirmation": "secret123"
   }
   ```
 
-  **Response**:
+  **Response (201 Created)**
 
   ```json
   {
-    "user": { /* user object */ },
-    "token": "sanctum_or_passport_token"
+    "message": "User registered successfully",
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "1234567890",
+      "birthday": "1990-05-20",
+      "gender": "male",
+      "driverlicense": "D1234567",
+      "role": "user",
+      "created_at": "2025-05-15T12:34:56.000000Z",
+      "updated_at": "2025-05-15T12:34:56.000000Z"
+    },
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOi..."
   }
   ```
 
 * **Login**
-  `POST /api/v1/auth/login`
-  **Request Body**:
+  `POST /api/login`
+  **Request Body (JSON)**
 
   ```json
   {
-    "email": "jane@example.com",
+    "email": "john@example.com",
     "password": "secret123"
   }
   ```
 
-  **Response**:
+  **Response (200 OK)**
 
   ```json
   {
-    "user": { /* user object */ },
-    "token": "sanctum_or_passport_token"
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "1234567890",
+      "role": "user",
+      "created_at": "2025-05-15T12:34:56.000000Z",
+      "updated_at": "2025-05-15T12:34:56.000000Z"
+    },
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOi..."
   }
   ```
 
 * **Logout**
-  `POST /api/v1/auth/logout`
-  Requires `Authorization: Bearer <token>`
-
----
-
-### Passengers
-
-* **Request a Ride**
-  `POST /api/v1/rides`
-  *Requires Bearer token (role = passenger)*
-  **Request Body**:
+  `POST /api/logout`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
 
   ```json
   {
-    "pickup_address": "123 Main St, Cityville",
-    "dropoff_address": "456 Oak Ave, Townsville",
-    "pickup_lat": 40.7128,
-    "pickup_lng": -74.0060,
-    "dropoff_lat": 40.7580,
-    "dropoff_lng": -73.9855
+    "message": "Successfully logged out"
   }
   ```
 
-  **Response**:
+* **Refresh Token**
+  `POST /api/refresh`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
 
   ```json
   {
-    "ride": {
-      "id": 27,
-      "passenger_id": 5,
-      "driver_id": null,
-      "pickup_address": "...",
-      "dropoff_address": "...",
-      "status": "requested",
-      "fare_estimate": 12.50,
-      "created_at": "2025-05-20T14:32:01.000Z"
-    }
+    "user": { /* current user object */ },
+    "token": "newly_generated_token"
   }
   ```
 
-* **View My Rides**
-  `GET /api/v1/rides/mine`
-  *Returns an array of all rides requested by the authenticated passenger.*
-
-* **View Single Ride**
-  `GET /api/v1/rides/{ride}`
-  *Returns ride details, including driver info (if assigned) and status.*
-
-* **Cancel Ride**
-  `DELETE /api/v1/rides/{ride}`
-  *Only allowed if ride status is still “requested”.*
-
----
-
-### Drivers
-
-* **List Available Rides**
-  `GET /api/v1/rides/available`
-  *Returns rides with status = “requested”. Drivers can choose to accept.*
-
-* **Accept a Ride**
-  `POST /api/v1/rides/{ride}/accept`
-  *Requires driver token. Sets `ride.status = “accepted”` and `driver_id = <current_user>`. Sends notification to passenger.*
-
-* **Start Trip**
-  `POST /api/v1/rides/{ride}/start`
-  *Requires driver token. Allowed only if status = “accepted”. Changes status to “in\_progress”.*
-
-* **Complete Trip**
-  `POST /api/v1/rides/{ride}/complete`
-  *Requires driver token. Allowed only if status = “in\_progress”. Changes status to “completed” and charges fare.*
-
-* **View My Assigned Rides**
-  `GET /api/v1/rides/assigned`
-  *Returns an array of rides the driver has accepted (statuses: accepted, in\_progress).*
-
-* **Decline a Ride**
-  `POST /api/v1/rides/{ride}/decline`
-  *Driver can decline before starting. Reverts status to “requested” and removes driver assignment.*
-
----
-
-### Admin (Optional)
-
-* **List All Users**
-  `GET /api/v1/admin/users`
-  *Requires admin token.*
-
-* **List All Rides**
-  `GET /api/v1/admin/rides`
-  *Filtering by status, date, passenger, or driver is supported via query params.*
-
-* **Force-Assign / Reassign Driver**
-  `PUT /api/v1/admin/rides/{ride}/assign`
-  **Request Body**:
+* **Get Authenticated User Profile**
+  `GET /api/users`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
 
   ```json
   {
-    "driver_id": 8
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "1234567890",
+    "birthday": "1990-05-20",
+    "gender": "male",
+    "driverlicense": "D1234567",
+    "role": "user",
+    "created_at": "2025-05-15T12:34:56.000000Z",
+    "updated_at": "2025-05-15T12:34:56.000000Z"
   }
   ```
 
-* **Close Ride**
-  `POST /api/v1/admin/rides/{ride}/close`
-  *Allows admin to mark any ride as canceled or completed.*
+* **Get User by ID (Admin Only)**
+  `GET /api/users/{id}`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response**
+
+  ```json
+  {
+    "id": 5,
+    "name": "Alice Manager",
+    "email": "alice@example.com",
+    "phone": "0987654321",
+    "role": "manager",
+    "created_at": "2025-05-10T08:20:30.000000Z",
+    "updated_at": "2025-05-10T08:20:30.000000Z"
+  }
+  ```
+
+* **Get All Users (Admin Only)**
+  `GET /api/user`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response**
+
+  ```json
+  [
+    { "id": 1, "name": "John Doe", ... },
+    { "id": 2, "name": "Jane Smith", ... },
+    ...
+  ]
+  ```
+
+* **Delete User by ID (Admin Only)**
+  `DELETE /api/users/{id}`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
+
+  ```json
+  {
+    "message": "User deleted successfully"
+  }
+  ```
+
+* **Promote User to Admin (Admin Only)**
+  `POST /api/users/{id}/promote`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
+
+  ```json
+  {
+    "message": "User promoted to admin successfully"
+  }
+  ```
+
+* **Demote Admin to User (Admin Only)**
+  `POST /api/users/{id}/demote`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
+
+  ```json
+  {
+    "message": "User demoted to user successfully"
+  }
+  ```
+
+* **Promote User to Manager (Admin Only)**
+  `POST /api/users/{id}/promote/manager`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
+
+  ```json
+  {
+    "message": "User promoted to manager successfully"
+  }
+  ```
+
+* **Demote Manager to User (Admin Only)**
+  `POST /api/users/{id}/demote/manager`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
+
+  ```json
+  {
+    "message": "User demoted to user successfully"
+  }
+  ```
+
+* **Change Password (Authenticated User)**
+  `POST /api/changePassword`
+  *Requires*: `Authorization: Bearer <token>`
+  **Request Body**
+
+  ```json
+  {
+    "current_password": "oldPass123",
+    "new_password": "newStrongPass456",
+    "new_password_confirmation": "newStrongPass456"
+  }
+  ```
+
+  **Response (200 OK)**
+
+  ```json
+  {
+    "message": "Password changed successfully"
+  }
+  ```
+
+* **Dashboard Summary**
+  `GET /api/dashboard`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
+
+  ```json
+  {
+    "users": 42,
+    "properties": 128,
+    "feedbacks": 37
+  }
+  ```
 
 ---
 
-## Database Schema
+### 2. Item Endpoints
 
-Below is an overview of the main tables (see `database/migrations` for full details).
+* **List All Items (Public)**
+  `GET /api/items`
+  **Response (200 OK)**
 
-* **users**
+  ```json
+  [
+    {
+      "id": 1,
+      "title": "Lost Wallet",
+      "description": "Black leather wallet near Central Park.",
+      "phone": "1234567890",
+      "user_id": 5,
+      "user_email": "john@example.com",
+      "user_phone": "1234567890",
+      "destination": "Central Park",
+      "time": "14:00",
+      "address": "5th Ave, NYC",
+      "date": "2025-06-01",
+      "is_taken": false
+    },
+    ...
+  ]
+  ```
 
-  * `id`
-  * `name`
-  * `email`
-  * `password`
-  * `role` (enum: `passenger`, `driver`, `admin`)
-  * `created_at` · `updated_at`
+* **List All User-Type Items (Public)**
+  `GET /api/items/user`
+  *Filters items where `post_type = "user"`*
+  **Response**
 
-* **rides**
+  ```json
+  [
+    {
+      "id": 3,
+      "title": "Found Keys",
+      "description": "Set of keys near Elm Street.",
+      "phone": "0987654321",
+      "user_id": 7,
+      "user_email": "alice@example.com",
+      "user_phone": "0987654321",
+      "destination": "Elm Street",
+      "time": "09:30",
+      "address": "Elm St, Townsville",
+      "date": "2025-05-28",
+      "is_taken": 2
+    },
+    ...
+  ]
+  ```
 
-  * `id`
-  * `passenger_id` (foreign key → `users.id`)
-  * `driver_id` (foreign key → `users.id`, nullable until assigned)
-  * `pickup_address`
-  * `pickup_lat`
-  * `pickup_lng`
-  * `dropoff_address`
-  * `dropoff_lat`
-  * `dropoff_lng`
-  * `status` (enum: `requested`, `accepted`, `in_progress`, `completed`, `canceled`)
-  * `fare_estimate` (decimal)
-  * `fare_actual` (decimal, nullable until completed)
-  * `requested_at` (timestamp)
-  * `started_at` (timestamp, nullable)
-  * `completed_at` (timestamp, nullable)
-  * `created_at` · `updated_at`
+* **List All Manager-Type Items (Public)**
+  `GET /api/items/manager`
+  *Filters items where `post_type = "manager"`*
+  **Response**
 
-* **notifications** (if implemented)
+  ```json
+  [
+    {
+      "id": 10,
+      "title": "Office Chair Pickup",
+      "description": "Extra office chair available near HQ.",
+      "phone": "5551234567",
+      "user_id": 3,
+      "user_email": "manager@example.com",
+      "user_phone": "5551234567",
+      "destination": "Corporate HQ",
+      "time": "11:00",
+      "address": "123 Business Rd",
+      "date": "2025-06-02",
+      "is_taken": false
+    },
+    ...
+  ]
+  ```
 
-  * `id`
-  * `user_id`
-  * `type`
-  * `data` (JSON payload)
-  * `read_at`
-  * `created_at` · `updated_at`
+* **Show Single Item (Authenticated Required)**
+  `GET /api/items/{id}`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response**
+
+  ```json
+  {
+    "id": 1,
+    "title": "Lost Wallet",
+    "description": "Black leather wallet near Central Park.",
+    "phone": "1234567890",
+    "user_id": 5,
+    "user_email": "john@example.com",
+    "user_phone": "1234567890",
+    "destination": "Central Park",
+    "time": "14:00",
+    "address": "5th Ave, NYC",
+    "date": "2025-06-01",
+    "is_taken": false
+  }
+  ```
+
+* **List Items Taken by Authenticated User**
+  `GET /api/useritems`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response**
+
+  ```json
+  [
+    {
+      "id": 7,
+      "title": "Lost Phone",
+      "description": "iPhone found near subway station.",
+      "phone": "1112223333",
+      "user_id": 9,
+      "user_email": "emma@example.com",
+      "user_phone": "1112223333",
+      "destination": "Subway Station",
+      "time": "16:45",
+      "address": "7th Ave",
+      "date": "2025-05-30",
+      "is_taken": 12
+    },
+    ...
+  ]
+  ```
+
+* **Create a New Item**
+  `POST /api/items`
+  *Requires*: `Authorization: Bearer <token>`
+  **Request Body (JSON)**
+
+  ```json
+  {
+    "title": "Wanted: Bike Repair Kit",
+    "description": "Looking for a repair kit for my mountain bike.",
+    "address": "123 Bike Lane",
+    "phone": "2223334444",
+    "date": "2025-06-05",
+    "destination": "Bike Shop",
+    "time": "10:00",
+    "post_type": "user"
+  }
+  ```
+
+  **Response (201 Created)**
+
+  ```json
+  {
+    "id": 15,
+    "title": "Wanted: Bike Repair Kit",
+    "description": "Looking for a repair kit for my mountain bike.",
+    "user_id": 1,
+    "user_email": "john@example.com",
+    "user_phone": "1234567890",
+    "phone": "2223334444",
+    "destination": "Bike Shop",
+    "time": "10:00",
+    "address": "123 Bike Lane",
+    "date": "2025-06-05",
+    "post_type": "user",
+    "is_taken": false
+  }
+  ```
+
+* **Update an Item (Owner or Admin Only)**
+  `PATCH /api/items/{id}`
+  *Requires*: `Authorization: Bearer <token>`
+  **Request Body (JSON)**
+
+  * Any subset of: `title`, `description`, `address`, `phone`, `destination`, `time`, `date`, `post_type`, `is_taken`
+
+  ```json
+  {
+    "description": "Updated description text here.",
+    "is_taken": true
+  }
+  ```
+
+  **Response (200 OK)**
+
+  ```json
+  {
+    "id": 15,
+    "title": "Wanted: Bike Repair Kit",
+    "description": "Updated description text here.",
+    "user_id": 1,
+    "user_email": "john@example.com",
+    "user_phone": "1234567890",
+    "phone": "2223334444",
+    "destination": "Bike Shop",
+    "time": "10:00",
+    "address": "123 Bike Lane",
+    "date": "2025-06-05",
+    "post_type": "user",
+    "is_taken": true
+  }
+  ```
+
+* **Delete an Item (Owner Only)**
+  `DELETE /api/items/{id}`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response (200 OK)**
+
+  ```json
+  {
+    "message": "Item deleted successfully"
+  }
+  ```
+
+* **Mark Item as Taken**
+  `POST /api/items/{id}/take`
+  *Requires*: `Authorization: Bearer <token>`
+
+  * If the item is already taken, returns a 400 error.
+    **Response (200 OK)**
+
+  ```json
+  {
+    "message": "Item is now taken"
+  }
+  ```
+
+* **Get Items Taken by You**
+  `GET /api/myitem`
+  *Requires*: `Authorization: Bearer <token>`
+  **Response**
+
+  ```json
+  [
+    {
+      "id": 20,
+      "title": "Lost Wallet",
+      "description": "Black wallet found near park.",
+      "phone": "1234567890",
+      "user_id": 5,
+      "user_email": "john@example.com",
+      "user_phone": "1234567890",
+      "destination": "Central Park",
+      "time": "15:00",
+      "address": "5th Ave, NYC",
+      "date": "2025-06-01",
+      "is_taken": 2
+    },
+    ...
+  ]
+  ```
+
+---
+
+### 3. Feedback Endpoints
+
+* **List All Feedback Entries (Public)**
+  `GET /api/feedbacks`
+  **Response (200 OK)**
+
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Alice",
+      "message": "Great service!",
+      "rating": "5",
+      "created_at": "2025-05-20T10:12:00.000000Z",
+      "updated_at": "2025-05-20T10:12:00.000000Z"
+    },
+    ...
+  ]
+  ```
+
+* **Create a New Feedback Entry (Public)**
+  `POST /api/feedbacks`
+  **Request Body (JSON)**
+
+  ```json
+  {
+    "name": "Bob",
+    "message": "Very helpful support.",
+    "rating": 4
+  }
+  ```
+
+  **Response (201 Created)**
+
+  ```json
+  {
+    "id": 10,
+    "name": "Bob",
+    "message": "Very helpful support.",
+    "rating": "4",
+    "created_at": "2025-06-02T14:45:00.000000Z",
+    "updated_at": "2025-06-02T14:45:00.000000Z"
+  }
+  ```
+
+* **Show One Feedback (Public)**
+  `GET /api/feedbacks/{id}`
+  **Response (200 OK)**
+
+  ```json
+  {
+    "id": 2,
+    "name": "Charlie",
+    "message": "Could improve documentation.",
+    "rating": "3",
+    "created_at": "2025-05-22T08:30:00.000000Z",
+    "updated_at": "2025-05-22T08:30:00.000000Z"
+  }
+  ```
+
+* **Update Feedback (Public)**
+  `PUT /api/feedbacks/{id}`
+  **Request Body (JSON)**
+
+  ```json
+  {
+    "message": "Updated feedback message.",
+    "rating": 5
+  }
+  ```
+
+  **Response (200 OK)**
+
+  ```json
+  {
+    "id": 2,
+    "name": "Charlie",
+    "message": "Updated feedback message.",
+    "rating": "5",
+    "created_at": "2025-05-22T08:30:00.000000Z",
+    "updated_at": "2025-05-23T11:15:00.000000Z"
+  }
+  ```
+
+* **Delete Feedback (Public)**
+  `DELETE /api/feedbacks/{id}`
+  **Response (204 No Content)**
+
+---
+
+## Validation & Error Handling
+
+* All **create** and **update** endpoints validate incoming data via Laravel’s `validate()` method.
+* On validation failure, responses are returned with HTTP status **400** and a JSON body listing validation errors.
+* Unauthorized actions (e.g., updating/deleting someone else’s item) return HTTP **403 Forbidden** with a message.
 
 ---
 
 ## Testing
 
-Run the automated test suite (PHPUnit + Laravel Feature tests):
+Run the test suite using PHPUnit:
 
 ```bash
 php artisan test
 ```
 
-Test coverage typically includes:
+Tests cover:
 
-* Authentication (registration/login/logout)
-* Role-based access control (passenger vs. driver vs. admin)
-* Ride request workflows (request → accept → start → complete)
-* Input validation and error responses
-* Notification dispatch (if implemented)
-
----
-
-## Environment Variables
-
-Sensitive or environment-specific settings live in your `.env` file. Key variables include:
-
-```dotenv
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=base64:generated_key_here
-APP_DEBUG=true
-APP_URL=http://localhost
-
-LOG_CHANNEL=stack
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=uber_car
-DB_USERNAME=your_user
-DB_PASSWORD=your_pass
-
-BROADCAST_DRIVER=log
-CACHE_DRIVER=file
-QUEUE_CONNECTION=sync
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-
-# If using Laravel Sanctum:
-SANCTUM_STATEFUL_DOMAINS=localhost
-SESSION_DOMAIN=localhost
-
-# If using third-party services (e.g., Twilio) for SMS:
-TWILIO_SID=your_twilio_sid
-TWILIO_TOKEN=your_twilio_auth_token
-TWILIO_FROM=+1234567890
-```
+* Authentication flows (register, login, token refresh)
+* Role-based access (promote/demote, dashboard, protected endpoints)
+* CRUD operations on items (creation, update, deletion, “take” action)
+* Feedback CRUD (validation, listing, updating, deletion)
 
 ---
 
 ## Contributing
 
-1. Fork the repository.
-2. Create a new branch:
+1. Fork this repository.
+2. Create a new feature branch:
 
    ```bash
    git checkout -b feature/YourFeatureName
    ```
-3. Make your changes and write tests if needed.
-4. Commit your changes:
+3. Commit your changes following PSR-12 coding standards.
+4. Push to your branch and open a Pull Request with a clear description of your changes.
 
-   ```bash
-   git commit -m "Add feature: ..."
-   ```
-5. Push to your branch:
-
-   ```bash
-   git push origin feature/YourFeatureName
-   ```
-6. Open a Pull Request and describe your changes.
-
-Please adhere to PSR-12 coding standards, include clear commit messages, and ensure all tests pass.
+Please include tests for any new functionality.
 
 ---
 
@@ -414,5 +788,4 @@ Please adhere to PSR-12 coding standards, include clear commit messages, and ens
 This project is released under the [MIT License](LICENSE).
 
 ```
-::contentReference[oaicite:0]{index=0}
 ```
